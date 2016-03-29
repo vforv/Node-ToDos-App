@@ -4,13 +4,18 @@ module.exports = function (sequelize, DataTypes) {
             type: DataTypes.STRING,
             allowNull: false,
             validate: {
-                len: [1, 200]
+                len: [1, 200],
+                isAlpha: true
             }
         },
         status: {
             type: DataTypes.BOOLEAN,
             allowNull: false,
-            defaultValue: false
+            defaultValue: false,
+            validate: {
+                len: [1, 200],
+                isBoolean: true
+            }
         }
 
     });

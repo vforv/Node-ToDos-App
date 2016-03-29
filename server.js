@@ -40,12 +40,8 @@ app.get('/todos', function (req, res) {
                 res.status(500).send();
             });
 
-//    var filtredTodos = todos;
-//    if (queryParams.hasOwnProperty('status') && queryParams.status === 'true') {
-//        filtredTodos = _.where(filtredTodos, {status: true});
-//    } else if (queryParams.hasOwnProperty('status') && queryParams.status === 'false') {
 //        filtredTodos = _.where(filtredTodos, {status: false});
-//    }
+
 //
 //    if (queryParams.hasOwnProperty('q') && queryParams.q.length > 0) {
 //        filtredTodos = _.filter(filtredTodos, function (todo) {
@@ -53,7 +49,6 @@ app.get('/todos', function (req, res) {
 //        });
 //    }
 //
-//    res.json(filtredTodos);
 });
 
 //GET /todos/:id
@@ -108,27 +103,36 @@ app.delete('/todos/:id', function (req, res) {
 
 //PUT /todos/:id
 app.put('/todos/:id', function (req, res) {
-    var matchItem = _.findWhere(todos, {id: parseInt(req.params.id)});
     var body = _.pick(req.body, 'description', 'status');
-    var validAttributes = {};
-    if (!matchItem) {
-        return res.status(404).send();
-    }
+    var attributes = {};
+
     if (body.hasOwnProperty('status')) {
-        validAttributes.status = body.status;
-    } else if (body.hasOwnProperty('status')) {
-        return res.status(400).send();
+        attributes.status = body.status;
     }
 
-
-    if (body.hasOwnProperty('description') && _.isString(body.description) && body.description.trim().length > 0) {
-        validAttributes.descrition = body.description;
-    } else if (body.hasOwnProperty('description')) {
-        return res.status(400).send();
+    // && _.isString(body.description) && body.description.trim().length > 0
+    if (body.hasOwnProperty('description')) {
+        attributes.description = body.description;
     }
 
-    _.extend(matchItem, validAttributes);
-    res.json(matchItem);
+    db.todo.findById(req.params.id)
+            .then(function (todo) {
+                if (todo) {
+                    todo.update(attributes).then(function (todo) {
+                        res.json(todo.toJSON());
+                    }, function (e) {
+                        res.status(400).json(e);
+                    });
+                } else {
+                    res.status(404).send();
+                }
+            }, function () {
+                res.status(500).send();
+            });
+
+
+
+//    _.extend(matchItem, validAttributes);
 });
 
 

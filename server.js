@@ -4,10 +4,11 @@ var app = express();
 var _ = require("underscore");
 var db = require('./db.js');
 var PORT = process.env.PORT || 3000;
-var id = 1;
+var bcrypt = require('bcrypt');
+
+
 app.use(bodyParser.json());
-var todos = [
-];
+
 app.get('/', function (req, res) {
     res.send("Hello Wrold");
 });
@@ -138,7 +139,7 @@ app.put('/todos/:id', function (req, res) {
 //----------
 
 //GET /user
-app.post('/user', function (req,res) {
+app.post('/user', function (req, res) {
     var body = _.pick(req.body, 'email', 'password');
 
     db.user.create(body)
@@ -151,7 +152,23 @@ app.post('/user', function (req,res) {
 });
 
 
-db.sequelize.sync({force: true})
+//POST /user/login
+app.post('/user/login', function (req, res) {
+    var body = _.pick(req.body, 'email', 'password');
+
+    db.user.auth(body)
+            .then(function (user) {
+                res.json(user.toPublicJSON());
+            })
+            .catch(function () {
+                res.status(401).send();
+            });
+
+
+
+});
+
+db.sequelize.sync()
         .then(function () {
             app.listen(PORT, function () {
                 console.log("Server Sterted!");

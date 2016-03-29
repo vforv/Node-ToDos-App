@@ -1,21 +1,30 @@
 var Sequelize = require("sequelize");
+var env = process.env.NODE_ENV || 'development';
 
-var sequelize = new Sequelize('todonode', 'root', 'sifra15', {
-    host: "localhost",
-    dialect: "mysql",
-    logging: function () {},
-    pool: {
-        max: 5,
-        min: 0,
-        idle: 10000
-    },
-    dialectOptions: {
-        socketPath: "/var/run/mysql/mysql.sock"
-    },
-    define: {
-        paranoid: true
-    }
-});
+if (env === 'production') {
+    var sequelize = new Sequelize(process.env.DATABASE_URL, {
+       dialect: 'postgres'
+    });
+} else {
+    var sequelize = new Sequelize('todonode', 'root', 'sifra15', {
+        host: "localhost",
+        dialect: "mysql",
+        logging: function () {
+        },
+        pool: {
+            max: 5,
+            min: 0,
+            idle: 10000
+        },
+        dialectOptions: {
+            socketPath: "/var/run/mysql/mysql.sock"
+        },
+        define: {
+            paranoid: true
+        }
+    });
+}
+
 
 var db = {};
 

@@ -1,8 +1,9 @@
 var express = require("express");
 var bodyParser = require("body-parser");
+var db = require('./db.js');
+var middleware = require('./middleware.js')(db);
 var app = express();
 var _ = require("underscore");
-var db = require('./db.js');
 var PORT = process.env.PORT || 3000;
 var bcrypt = require('bcrypt');
 
@@ -13,7 +14,7 @@ app.get('/', function (req, res) {
     res.send("Hello Wrold");
 });
 //GET /todos?status=true
-app.get('/todos', function (req, res) {
+app.get('/todos',middleware.requireAuth ,function (req, res) {
 
     var queryParams = req.query;
     var where = {};
@@ -53,7 +54,7 @@ app.get('/todos', function (req, res) {
 });
 
 //GET /todos/:id
-app.get('/todos/:id', function (req, res) {
+app.get('/todos/:id',middleware.requireAuth , function (req, res) {
 
     db.todo.findById(req.params.id)
             .then(function (todo) {
@@ -70,11 +71,16 @@ app.get('/todos/:id', function (req, res) {
 });
 
 //POST /todos
-app.post('/todos', function (req, res) {
+app.post('/todos',middleware.requireAuth , function (req, res) {
     var body = _.pick(req.body, 'description', 'status');
     db.todo.create(body)
             .then(function (todo) {
-                res.json(todo.toJSON());
+                req.user.addTodo(todo)
+                .then(function() {
+                    return todo.reload();
+                }).then(function(todo){
+                    res.json(todo.toJSON());
+                });
             })
             .catch(function (e) {
                 res.status(400).json(e);
@@ -82,7 +88,7 @@ app.post('/todos', function (req, res) {
 });
 
 // DELETE /todos
-app.delete('/todos/:id', function (req, res) {
+app.delete('/todos/:id',middleware.requireAuth , function (req, res) {
     db.todo.destroy({
         where: {
             id: req.params.id
@@ -103,7 +109,7 @@ app.delete('/todos/:id', function (req, res) {
 });
 
 //PUT /todos/:id
-app.put('/todos/:id', function (req, res) {
+app.put('/todos/:id',middleware.requireAuth , function (req, res) {
     var body = _.pick(req.body, 'description', 'status');
     var attributes = {};
 
@@ -173,7 +179,7 @@ app.post('/user/login', function (req, res) {
 
 });
 
-db.sequelize.sync()
+db.sequelize.sync({force:true})
         .then(function () {
             app.listen(PORT, function () {
                 console.log("Server Sterted!");

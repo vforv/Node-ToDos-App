@@ -30,7 +30,7 @@ module.exports = function (sequelize, DataTypes) {
                 var hashedPassword = bcrypt.hashSync(value, salt);
 
                 this.setDataValue('password', value);
-                this.setDataValue('salt', value);
+                this.setDataValue('salt', salt);
                 this.setDataValue('password_hash', hashedPassword);
             }
         }
@@ -41,20 +41,19 @@ module.exports = function (sequelize, DataTypes) {
                 var json = this.toJSON();
                 return _.pick(json, 'id', 'email', 'createdAt', 'updatedAt');
             },
-            getToken: function(type) {
-                if(!_.isString(type)) {
+            getToken: function (type) {
+                if (!_.isString(type)) {
                     return undefined;
                 }
-                
                 try {
-                    var stringData = JSON.stringify({id: this.get('id'), type:type});
+                    var stringData = JSON.stringify({id: this.get('id'), type: type});
                     var encryptedData = cryptojs.AES.encrypt(stringData, 'ava123321asd').toString();
                     var token = jwt.sign({
                         token: encryptedData
-                    },'qwery030');
-                    
+                    }, 'qwery030');
+
                     return token;
-                } catch(e) {
+                } catch (e) {
                     return undefined;
                 }
             }
@@ -81,6 +80,29 @@ module.exports = function (sequelize, DataTypes) {
                             }, function () {
                                 reject();
                             });
+                });
+            },
+            findByToken: function (token) {
+                return new Promise(function (resolve, reject) {
+                    try {
+                        var decodedJWT = jwt.verify(token, 'qwery030');
+                        var bytes = cryptojs.AES.decrypt(decodedJWT.token, 'ava123321asd');
+                        var tokenData = JSON.parse(bytes.toString(cryptojs.enc.Utf8));
+                        user.findById(tokenData.id)
+                                .then(function (user) {
+
+                                    if (user) {
+                                        resolve(user);
+                                    } else {
+                                        reject();
+                                    }
+                                })
+                                .catch(function () {
+                                    reject();
+                                });
+                    } catch (e) {
+                        reject();
+                    }
                 });
             }
         }

@@ -185,7 +185,10 @@ app.post('/user/login', function (req, res) {
 
             })
             .then(function (tokenInstance) {
-                res.header('Auth', tokenInstance.token).json(userInstance.toPublicJSON());
+                res.json({
+                    token: tokenInstance.token,
+                    user: userInstance.toPublicJSON()
+                });
             })
             .catch(function () {
                 res.status(401).send();
@@ -196,16 +199,16 @@ app.post('/user/login', function (req, res) {
 });
 
 // DELETE /user/logout
-app.delete('/users/logout', middleware.requireAuth, function(req, res){
-    
+app.delete('/users/logout', middleware.requireAuth, function (req, res) {
+
     req.token.destroy()
-            .then(function() {
+            .then(function () {
                 res.status(204).send();
-    })
-            .catch(function(e) {
+            })
+            .catch(function (e) {
                 res.status(500).send(e);
-    });
-    
+            });
+
 });
 
 db.sequelize.sync({force: true})

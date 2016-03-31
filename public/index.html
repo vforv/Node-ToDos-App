@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>TODO app</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <h1>Documentation</h1>
+
+        <h3>Create user</h3>
+        <pre>
+POST /user
+{
+    "email": "vladimir@inventous.com",
+    "password": "test123"
+}
+        </pre>
+
+        <h3>Login user</h3>
+        <pre>
+POST /user/login
+{
+    "email": "vladimir@inventous.com",
+    "password": "test123"
+}
+        </pre>
+
+        <h3>User loguot</h3>
+
+        <pre>
+DELETE  /user/logout
+
+header
+Auth: token key
+        </pre>
+
+        <h3>Create new todo</h3>
+
+        <pre>
+POST /todos
+
+{
+    "description" : "test",
+    "status"    : false
+}
+
+header
+Auth: token key
+        </pre>
+
+        <h3>Get todos</h3>
+        <pre>
+GET /todos?q=test?status=true
+        
+GET /todos/1 
+
+header
+Auth: token key
+        </pre>
+
+        <h3>Delete todo</h3>
+
+        <pre>
+DELETE todos/1
+
+header
+Auth: token key
+        </pre>
+
+        <h3>Update todo</h3>
+
+        <pre>
+PUT /todos/1
+
+{
+    "description": "testdva"
+}
+
+header
+Auth: token key
+        </pre>
+
+
+    </body>
+</html>

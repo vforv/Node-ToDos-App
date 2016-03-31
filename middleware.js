@@ -4,7 +4,7 @@ module.exports = function (db) {
     return {
         requireAuth: function (req, res, next) {
             var token = req.get('Auth') || '';
-            
+
             db.token.findOne({
                 where: {
                     tokenHash: cryptojs.MD5(token).toString()
@@ -14,7 +14,7 @@ module.exports = function (db) {
                         if (!tokenInstance) {
                             throw new Error();
                         }
-                        
+
                         req.token = tokenInstance;
                         return db.user.findByToken(token);
                     })
@@ -25,6 +25,13 @@ module.exports = function (db) {
                     .catch(function () {
                         res.status(401).send();
                     });
+        },
+        header: function (req, res, next) {
+            res.header("Access-Control-Allow-Origin", "*");
+            res.header("Access-Control-Allow-Headers", "X-Requested-With");
+            res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+            res.header("Access-Control-Allow-Headers", "Cache-Control, Pragma, Origin, Authorization, Content-Type, X-Requested-With, Auth");
+            next();
         }
     };
 };
